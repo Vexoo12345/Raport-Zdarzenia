@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Karta Zdarzenia IZZ</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --red: #b71c1c;
+    --red-dark: #7f0000;
+    --red-light: #ffebee;
+    --border: #d1d5db;
+    --green: #198754;
+    --blue: #0d6efd;
+    --background: #eef1f4;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: #222;
+}
+
+header {
+    background: linear-gradient(135deg, var(--red-dark), var(--red));
+    color: white;
+    padding: 22px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+.header-inner {
+    max-width: 1200px;
+    margin: auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+header p {
+    margin: 7px 0 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.section {
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    overflow: visible;
+}
+
+.section-title {
+    background: #fafafa;
+    border-bottom: 1px solid var(--border);
+    padding: 15px 18px;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--red-dark);
+}
+
+.section-body {
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 11px;
+    font-size: 15px;
+    background: white;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px rgba(183,28,28,.12);
+}
+
+textarea {
+    min-height: 130px;
+    resize: vertical;
+}
+
+.info-box {
+    padding: 12px 15px;
+    background: var(--red-light);
+    border-left: 4px solid var(--red);
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.hint {
+    font-size: 12px;
+    color: #666;
+}
+
+/* ================================
+   PRZYCISKI
+================================ */
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.btn {
+    border: 0;
+    border-radius: 7px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.btn:hover {
+    filter: brightness(.94);
+}
+
+.btn-primary {
+    background: var(--red);
+    color: white;
+}
+
+.btn-success {
+    background: var(--green);
+    color: white;
+}
+
+.btn-blue {
+    background: var(--blue);
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-light {
+    background: #e9ecef;
+    color: #222;
+}
+
+/* ================================
+   WYSZUKIWANIE OSÓB
+================================ */
+
+.person-picker {
+    position: relative;
+    width: 100%;
+}
+
+.person-input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 15px;
+    background: white;
+}
+
+.person-input:focus {
+    outline: none;
+    border-color: var(--red);
+    box-shadow: 0 0 0 2px rgba(183,28,28,.12);
+}
+
+.person-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 3px);
+    max-height: 280px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 7px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.18);
+    z-index: 9999;
+    display: none;
+}
+
+.person-dropdown.active {
+    display: block;
+}
+
+.person-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.person-option:hover {
+    background: #ffebee;
+}
+
+.person-option.selected {
+    background: #f8d7da;
+    font-weight: bold;
+}
+
+.no-person-results {
+    padding: 12px;
+    color: #777;
+    text-align: center;
+}
+
+/* ================================
+   ZASTĘPY
+================================ */
+
+.unit-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: visible;
+}
+
+.unit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+}
+
+.unit-header strong {
+    color: var(--red-dark);
+}
+
+.unit-body {
+    padding: 15px;
+}
+
+/* ================================
+   SIŁY I ŚRODKI
+================================ */
+
+.resource-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+}
+
+.resource-number {
+    font-weight: bold;
+    color: var(--red-dark);
+    margin-bottom: 5px;
+}
+
+/* ================================
+   STATUS
+================================ */
+
+.send-status {
+    display: none;
+    margin-top: 15px;
+    padding: 12px 15px;
+    border-radius: 7px;
+    background: #d9f4e3;
+    color: #146c43;
+    border: 1px solid #b7e4c7;
+    font-weight: bold;
+}
+
+.send-status.active {
+    display: block;
+}
+
+/* ================================
+   DOLNY PANEL
+================================ */
+
+.footer-actions {
+    position: sticky;
+    bottom: 0;
+    background: rgba(255,255,255,.97);
+    border-top: 1px solid var(--border);
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+}
+
+/* ================================
+   RESPONSYWNOŚĆ
+================================ */
+
+@media (max-width: 800px) {
+
+    .grid,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .resource-row {
+        grid-template-columns: 1fr;
+    }
+
+    .unit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .footer-actions {
+        position: static;
+        flex-wrap: wrap;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-inner">
+
+        <h1>🚒 Karta Zdarzenia IZZ</h1>
+
+        <p>
+            Elektroniczna karta zdarzenia
+        </p>
+
+    </div>
+</header>
+
+
+<div class="container">
+
+
+<!-- ======================================================
+     1. KIERUJĄCY DZIAŁANIAMI RATOWNICZYMI
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        1. Kierujący działaniami ratowniczymi
+    </div>
+
+    <div class="section-body">
+
+        <div class="grid">
+
+            <div class="field">
+
+                <label>
+                    Imię i nazwisko
+                </label>
+
+                <div
+                    id="kdr"
+                    class="person-picker-container">
+                </div>
+
+                <div class="hint">
+                    Wpisz imię, nazwisko, JRG lub stopień.
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Wypełnia KZ z uprawnieniami
+                </label>
+
+                <select id="kdrRole">
+
+                    <option value="">
+                        -- wybierz --
+                    </option>
+
+                    <option value="Dowódca zastępu">
+                        Dowódca zastępu
+                    </option>
+
+                    <option value="Kierujący działaniami ratowniczymi">
+                        Kierujący działaniami ratowniczymi
+                    </option>
+
+                    <option value="Oficer operacyjny">
+                        Oficer operacyjny
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     2. KATEGORIA ZDARZENIA
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        2. Kategoria zdarzenia
+    </div>
+
+    <div class="section-body">
+
+        <div class="grid">
+
+            <div class="field">
+
+                <label>
+                    Kategoria zdarzenia
+                </label>
+
+                <select
+                    id="category"
+                    onchange="updateEventSizes()">
+
+                    <option value="">
+                        -- wybierz --
+                    </option>
+
+                    <option value="Pożar">
+                        Pożar
+                    </option>
+
+                    <option value="Miejscowe zagrożenie">
+                        Miejscowe zagrożenie
+                    </option>
+
+                    <option value="Alarm fałszywy">
+                        Alarm fałszywy
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Wielkość zdarzenia
+                </label>
+
+                <select id="eventSize">
+
+                    <option value="">
+                        -- wybierz kategorię --
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     3. OBSADA ZASTĘPÓW
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        3. Obsada zastępów
+    </div>
+
+    <div class="section-body">
+
+        <div id="unitsContainer"></div>
+
+        <div class="actions">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="addUnit()">
+
+                ➕ Dodaj zastęp
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     4. SIŁY I ŚRODKI
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        4. Siły i środki
+    </div>
+
+    <div class="section-body">
+
+        <div id="resourcesContainer"></div>
+
+        <div class="actions">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="addResource()">
+
+                ➕ Dodaj siły i środek
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     5. PRZEBIEG DZIAŁAŃ
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        5. Przebieg działań
+    </div>
+
+    <div class="section-body">
+
+        <div class="field">
+
+            <label>
+                1. 📍 Lokalizacja zdarzenia
+            </label>
+
+            <input
+                id="location"
+                type="text"
+                placeholder="Wpisz lokalizację zdarzenia">
+
+        </div>
+
+        <br>
+
+        <div class="grid">
+
+            <div class="field">
+
+                <label>
+                    2. Przybycie na miejsce zdarzenia
+                </label>
+
+                <input
+                    id="arrivalTime"
+                    type="datetime-local">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    onclick="setNow('arrivalTime')">
+
+                    Ustaw aktualny czas
+
+                </button>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    3. Zakończenie działań
+                </label>
+
+                <input
+                    id="endTime"
+                    type="datetime-local">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    onclick="setNow('endTime')">
+
+                    Ustaw aktualny czas
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     6. OPIS ZDARZENIA
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        6. Opis zdarzenia
+    </div>
+
+    <div class="section-body">
+
+        <div class="field">
+
+            <label>
+                Opis zdarzenia i przebiegu działań
+            </label>
+
+            <textarea
+                id="description"
+                style="min-height:240px"
+                placeholder="Opisz sytuację zastaną na miejscu, przebieg zdarzenia oraz podjęte działania..."></textarea>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ======================================================
+     7. SPORZĄDZAJĄCY
+======================================================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        7. Osoba sporządzająca kartę
+    </div>
+
+    <div class="section-body">
+
+        <div class="field">
+
+            <label>
+                Imię i nazwisko
+            </label>
+
+            <div
+                id="author"
+                class="person-picker-container">
+            </div>
+
+            <div class="hint">
+                Wpisz imię, nazwisko, JRG lub stopień.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<div
+    id="sendStatus"
+    class="send-status">
+
+    ✓ Karta IZZ została przygotowana do wysłania.
+
+</div>
+
+</div>
+
+
+<!-- ======================================================
+     PRZYCISKI
+======================================================= -->
+
+<div class="footer-actions">
+
+    <button
+        type="button"
+        class="btn btn-primary"
+        onclick="sendIZZ()">
+
+        📨 Wyślij kartę IZZ
+
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-light"
+        onclick="newCard()">
+
+        📄 Nowa karta
+
+    </button>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   LISTA OSÓB
+   TUTAJ RĘCZNIE PODMIENIASZ LISTĘ
+========================================================= */
+
+const LISTA_OSOB = [
+
+    "KTOS",
+    
+];
+
+
+/* =========================================================
+   NUMERY OPERACYJNE
+   TUTAJ RĘCZNIE UZUPEŁNIASZ LISTĘ
+========================================================= */
+
+const NUMERY_OPERACYJNE = [
+
+
+    "POZNAN PSP",
+
+];
+
+
+/* =========================================================
+   SIŁY I ŚRODKI
+   TUTAJ RĘCZNIE UZUPEŁNIASZ LISTĘ
+
+   Przykład:
+
+========================================================= */
+
+const SILY_I_SRODKI = [
+
+    "POZNAN PSP",
+    "KPP",
+    "PRM",
+    "Służba Drogowa",
+    "Straż Gminna",
+    "Pogotowie gazowe",
+    "Pogotowie energetyczne",
+
+];
+
+
+let unitCounter = 0;
+let resourceCounter = 0;
+
+
+/* =========================================================
+   START
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        document
+            .getElementById("kdr")
+            .appendChild(
+                createPersonPicker()
+            );
+
+        document
+            .getElementById("author")
+            .appendChild(
+                createPersonPicker()
+            );
+
+        addResource();
+    }
+);
+
+
+/* =========================================================
+   WYSZUKIWARKA OSÓB
+========================================================= */
+
+function createPersonPicker() {
+
+    const wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "person-picker";
+
+    wrapper.innerHTML = `
+
+        <input
+            type="text"
+            class="person-input"
+            placeholder="🔎 Wpisz imię, nazwisko, JRG lub stopień..."
+            autocomplete="off"
+        >
+
+        <input
+            type="hidden"
+            class="person-value"
+            value=""
+        >
+
+        <div class="person-dropdown"></div>
+    `;
+
+    const input =
+        wrapper.querySelector(".person-input");
+
+    const hidden =
+        wrapper.querySelector(".person-value");
+
+    const dropdown =
+        wrapper.querySelector(".person-dropdown");
+
+
+    function showOptions(search) {
+
+        const query =
+            search.trim().toLowerCase();
+
+        dropdown.innerHTML = "";
+
+        const results =
+            LISTA_OSOB.filter(
+                function(person) {
+
+                    return person
+                        .toLowerCase()
+                        .includes(query);
+
+                }
+            );
+
+
+        if (results.length === 0) {
+
+            dropdown.innerHTML = `
+                <div class="no-person-results">
+                    Brak pasujących osób
+                </div>
+            `;
+
+            dropdown.classList.add("active");
+
+            return;
+        }
+
+
+        results.forEach(
+            function(person) {
+
+                const option =
+                    document.createElement("div");
+
+                option.className =
+                    "person-option";
+
+                option.textContent =
+                    person;
+
+
+                if (hidden.value === person) {
+
+                    option.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
+                option.addEventListener(
+                    "mousedown",
+                    function(event) {
+
+                        event.preventDefault();
+
+                        input.value =
+                            person;
+
+                        hidden.value =
+                            person;
+
+                        dropdown.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                dropdown.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        dropdown.classList.add("active");
+    }
+
+
+    input.addEventListener(
+        "focus",
+        function() {
+
+            showOptions(
+                input.value
+            );
+
+        }
+    );
+
+
+input.addEventListener(
+    "input",
+    function() {
+
+        // Pozwala wpisać osobę ręcznie,
+        // nawet jeśli nie ma jej na liście.
+        hidden.value = input.value.trim();
+
+        showOptions(
+            input.value
+        );
+
+    }
+);
+
+
+    input.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                dropdown.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                !wrapper.contains(
+                    event.target
+                )
+            ) {
+
+                dropdown.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    return wrapper;
+}
+
+
+/* =========================================================
+   POBIERANIE WYBRANEJ OSOBY
+========================================================= */
+
+function getPersonFromPicker(container) {
+
+    if (!container) {
+        return "";
+    }
+
+    const hidden = container.querySelector(
+        ".person-value"
+    );
+
+    const input = container.querySelector(
+        ".person-input"
+    );
+
+    // Najpierw pobieramy wybraną osobę.
+    // Jeśli jej nie wybrano, pobieramy wpisany tekst.
+    if (hidden && hidden.value.trim() !== "") {
+        return hidden.value.trim();
+    }
+
+    if (input) {
+        return input.value.trim();
+    }
+
+    return "";
+}
+
+
+/* =========================================================
+   WIELKOŚĆ ZDARZENIA
+========================================================= */
+
+function updateEventSizes() {
+
+    const category =
+        document.getElementById(
+            "category"
+        ).value;
+
+    const eventSize =
+        document.getElementById(
+            "eventSize"
+        );
+
+    eventSize.innerHTML = "";
+
+    let options = [];
+
+
+    if (category === "Pożar") {
+
+        options = [
+            "Mały (P/M)",
+            "Średni (P/Ś)",
+            "Duży (P/D)",
+            "Bardzo duży (P/BD)"
+        ];
+
+    }
+
+    else if (
+        category === "Miejscowe zagrożenie"
+    ) {
+
+        options = [
+            "Małe (MZ/M)",
+            "Lokalne (MZ/L)",
+            "Średnie (MZ/Ś)",
+            "Duże (MZ/D)",
+            "Gigantyczne / Klęski żywiołowe (MZ/G)"
+
+        ];
+
+    }
+
+    else if (
+        category === "Alarm fałszywy"
+    ) {
+
+        options = [
+            "Z instalacji wykrywania",
+            "W dobrej wierze",
+            "Złośliwy"
+        ];
+
+    }
+
+
+    if (options.length === 0) {
+
+        eventSize.innerHTML = `
+            <option value="">
+                -- wybierz kategorię --
+            </option>
+        `;
+
+        return;
+    }
+
+
+    options.forEach(
+        function(text) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = text;
+            option.textContent = text;
+
+            eventSize.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   NUMERY OPERACYJNE
+========================================================= */
+
+function fillOperationalNumbers(select) {
+
+    select.innerHTML = `
+        <option value="">
+            -- wybierz numer operacyjny --
+        </option>
+    `;
+
+    NUMERY_OPERACYJNE.forEach(
+        function(number) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = number;
+            option.textContent = number;
+
+            select.appendChild(
+                option
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   DODAJ ZASTĘP
+========================================================= */
+
+function addUnit() {
+
+    unitCounter++;
+
+    const unitId =
+        unitCounter;
+
+    const container =
+        document.getElementById(
+            "unitsContainer"
+        );
+
+    const card =
+        document.createElement("div");
+
+    card.className =
+        "unit-card";
+
+    card.id =
+        "unit-" + unitId;
+
+
+    card.innerHTML = `
+
+        <div class="unit-header">
+
+            <strong>
+                🚒 Zastęp ${unitId}
+            </strong>
+
+            <button
+                type="button"
+                class="btn btn-danger"
+                onclick="removeUnit(${unitId})">
+
+                🗑️ Usuń zastęp
+
+            </button>
+
+        </div>
+
+
+        <div class="unit-body">
+
+            <div class="field">
+
+                <label>
+                    Numer operacyjny wozu
+                </label>
+
+                <select class="unit-vehicle">
+
+                    <option value="">
+                        -- wybierz numer operacyjny --
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <hr
+                style="
+                    margin:20px 0;
+                    border:0;
+                    border-top:1px solid #ddd;
+                "
+            >
+
+
+            <div class="grid grid-3">
+
+
+                <div class="field">
+
+                    <label>
+                        👨‍🚒 Kierowca
+                    </label>
+
+                    <div
+                        class="unit-driver person-picker-container">
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        ⭐ Dowódca
+                    </label>
+
+                    <div
+                        class="unit-commander person-picker-container">
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        👨‍🚒 Przodownik R1
+                    </label>
+
+                    <div
+                        class="unit-r1leader person-picker-container">
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        👨‍🚒 Pomocnik R1
+                    </label>
+
+                    <div
+                        class="unit-r1helper person-picker-container">
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        👨‍🚒 Przodownik R2
+                    </label>
+
+                    <div
+                        class="unit-r2leader person-picker-container">
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        👨‍🚒 Pomocnik R2
+                    </label>
+
+                    <div
+                        class="unit-r2helper person-picker-container">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+
+    container.appendChild(card);
+
+
+    const vehicleSelect =
+        card.querySelector(
+            ".unit-vehicle"
+        );
+
+    fillOperationalNumbers(
+        vehicleSelect
+    );
+
+
+    card
+        .querySelectorAll(
+            ".person-picker-container"
+        )
+        .forEach(
+            function(personContainer) {
+
+                personContainer.appendChild(
+                    createPersonPicker()
+                );
+
+            }
+        );
+
+
+    /*
+     * Od razu przeliczamy numerację.
+     */
+
+    renumberUnits();
+}
+
+
+/* =========================================================
+   USUNIĘCIE ZASTĘPU
+========================================================= */
+
+function removeUnit(id) {
+
+    const element =
+        document.getElementById(
+            "unit-" + id
+        );
+
+    if (!element) {
+        return;
+    }
+
+
+    if (
+        !confirm(
+            "Czy na pewno usunąć ten zastęp?"
+        )
+    ) {
+        return;
+    }
+
+
+    element.remove();
+
+
+    /*
+     * AUTOMATYCZNE PRZELICZENIE
+     */
+
+    renumberUnits();
+}
+
+
+/* =========================================================
+   AUTOMATYCZNA NUMERACJA ZASTĘPÓW
+========================================================= */
+
+function renumberUnits() {
+
+    const units =
+        document.querySelectorAll(
+            ".unit-card"
+        );
+
+
+    units.forEach(
+        function(unit, index) {
+
+            const number =
+                index + 1;
+
+
+            const title =
+                unit.querySelector(
+                    ".unit-header strong"
+                );
+
+
+            if (title) {
+
+                title.textContent =
+                    "🚒 Zastęp " + number;
+
+            }
+
+        }
+    );
+}
+
+
+/* =========================================================
+   DODAJ SIŁY I ŚRODKI
+========================================================= */
+
+function addResource() {
+
+    resourceCounter++;
+
+
+    const id =
+        resourceCounter;
+
+
+    const container =
+        document.getElementById(
+            "resourcesContainer"
+        );
+
+
+    const row =
+        document.createElement("div");
+
+
+    row.className =
+        "resource-row";
+
+
+    row.id =
+        "resource-" + id;
+
+
+    row.innerHTML = `
+
+        <div>
+
+            <div class="resource-number">
+                Siły i środki ${id}
+            </div>
+
+            <select class="resource-select">
+
+                <option value="">
+                    -- wybierz siły i środek --
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn btn-danger"
+            onclick="removeResource(${id})">
+
+            🗑️ Usuń
+
+        </button>
+    `;
+
+
+    container.appendChild(row);
+
+
+    const select =
+        row.querySelector(
+            ".resource-select"
+        );
+
+
+    SILY_I_SRODKI.forEach(
+        function(resource) {
+
+            const option =
+                document.createElement("option");
+
+            option.value = resource;
+            option.textContent = resource;
+
+            select.appendChild(option);
+
+        }
+    );
+
+
+    renumberResources();
+}
+
+
+/* =========================================================
+   USUNIĘCIE SIŁ I ŚRODKA
+========================================================= */
+
+function removeResource(id) {
+
+    const element =
+        document.getElementById(
+            "resource-" + id
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.remove();
+
+
+    /*
+     * AUTOMATYCZNE PRZELICZENIE
+     */
+
+    renumberResources();
+}
+
+
+/* =========================================================
+   AUTOMATYCZNA NUMERACJA SIŁ I ŚRODKÓW
+========================================================= */
+
+function renumberResources() {
+
+    const rows =
+        document.querySelectorAll(
+            ".resource-row"
+        );
+
+
+    rows.forEach(
+        function(row, index) {
+
+            const number =
+                row.querySelector(
+                    ".resource-number"
+                );
+
+
+            if (number) {
+
+                number.textContent =
+                    "Siły i środki " +
+                    (index + 1);
+
+            }
+
+        }
+    );
+}
+
+
+/* =========================================================
+   AKTUALNY CZAS
+========================================================= */
+
+function formatDateTimeLocal(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    const hours =
+        String(
+            date.getHours()
+        ).padStart(2, "0");
+
+    const minutes =
+        String(
+            date.getMinutes()
+        ).padStart(2, "0");
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day +
+        "T" +
+        hours +
+        ":" +
+        minutes
+    );
+}
+
+
+function setNow(id) {
+
+    const input =
+        document.getElementById(id);
+
+    input.value =
+        formatDateTimeLocal(
+            new Date()
+        );
+}
+
+
+/* =========================================================
+   POBIERANIE OBSADY
+========================================================= */
+
+function getUnitsData() {
+
+    const units = [];
+
+
+    document
+        .querySelectorAll(
+            ".unit-card"
+        )
+        .forEach(
+            function(card, index) {
+
+
+                units.push({
+
+                    zastęp:
+                        index + 1,
+
+                    numerOperacyjny:
+                        card
+                            .querySelector(
+                                ".unit-vehicle"
+                            )
+                            .value,
+
+                    kierowca:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-driver"
+                            )
+                        ),
+
+                    dowódca:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-commander"
+                            )
+                        ),
+
+                    przodownikR1:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-r1leader"
+                            )
+                        ),
+
+                    pomocnikR1:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-r1helper"
+                            )
+                        ),
+
+                    przodownikR2:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-r2leader"
+                            )
+                        ),
+
+                    pomocnikR2:
+                        getPersonFromPicker(
+                            card.querySelector(
+                                ".unit-r2helper"
+                            )
+                        )
+
+                });
+
+            }
+        );
+
+
+    return units;
+}
+
+
+/* =========================================================
+   POBIERANIE SIŁ I ŚRODKÓW
+========================================================= */
+
+function getResourcesData() {
+
+    const resources = [];
+
+
+    document
+        .querySelectorAll(
+            ".resource-select"
+        )
+        .forEach(
+            function(select) {
+
+                if (
+                    select.value !== ""
+                ) {
+
+                    resources.push(
+                        select.value
+                    );
+
+                }
+
+            }
+        );
+
+
+    return resources;
+}
+
+
+/* =========================================================
+   PRZYGOTOWANIE KARTY
+========================================================= */
+
+function prepareIZZ() {
+
+    return {
+
+        dokument:
+            "Karta Zdarzenia IZZ",
+
+
+        kierujacyDzialaniami:
+            getPersonFromPicker(
+                document.getElementById(
+                    "kdr"
+                )
+            ),
+
+
+        wypelniaKZ:
+            document.getElementById(
+                "kdrRole"
+            ).value,
+
+
+        kategoriaZdarzenia:
+            document.getElementById(
+                "category"
+            ).value,
+
+
+        wielkoscZdarzenia:
+            document.getElementById(
+                "eventSize"
+            ).value,
+
+
+        obsadaZastepow:
+            getUnitsData(),
+
+
+        silyISrodki:
+            getResourcesData(),
+
+
+        lokalizacja:
+            document.getElementById(
+                "location"
+            ).value,
+
+
+        przybycieNaMiejsce:
+            document.getElementById(
+                "arrivalTime"
+            ).value,
+
+
+        zakonczenieDzialan:
+            document.getElementById(
+                "endTime"
+            ).value,
+
+
+        opisZdarzenia:
+            document.getElementById(
+                "description"
+            ).value,
+
+
+        sporzadzajacy:
+            getPersonFromPicker(
+                document.getElementById(
+                    "author"
+                )
+            )
+
+    };
+}
+
+
+/* =========================================================
+   WYŚLIJ KARTĘ IZZ
+========================================================= */
+
+async function sendIZZ() {
+
+    const karta = prepareIZZ();
+
+    /* =========================================
+       SPRAWDZENIE PODSTAWOWYCH DANYCH
+    ========================================= */
+
+    if (!karta.kierujacyDzialaniami) {
+        alert(
+            "Wybierz kierującego działaniami ratowniczymi."
+        );
+        return;
+    }
+
+    if (!karta.kategoriaZdarzenia) {
+        alert(
+            "Wybierz kategorię zdarzenia."
+        );
+        return;
+    }
+
+    if (!karta.wielkoscZdarzenia) {
+        alert(
+            "Wybierz wielkość zdarzenia."
+        );
+        return;
+    }
+
+    if (!karta.lokalizacja) {
+        alert(
+            "Wpisz lokalizację zdarzenia."
+        );
+        return;
+    }
+
+
+    /* =========================================
+       WEBHOOK DISCORD
+    ========================================= */
+
+    const DISCORD_WEBHOOK_URL =
+        "WHEBOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOK";
+
+
+    if (
+        DISCORD_WEBHOOK_URL ===
+        "TU_WKLEJ_WEBHOOK_DISCORD"
+    ) {
+
+        alert(
+            "Najpierw wpisz adres Webhooka Discord w kodzie."
+        );
+
+        return;
+    }
+
+
+    /* =========================================
+       ZASTĘPY
+    ========================================= */
+
+    let unitsText =
+        "Brak wpisanych zastępów.";
+
+    if (karta.obsadaZastepow.length > 0) {
+
+        unitsText =
+            karta.obsadaZastepow
+                .map(function(unit) {
+
+                    return (
+                        "**🚒 Zastęp " +
+                        unit.zastęp +
+                        "**\n" +
+
+                        "Numer operacyjny: " +
+                        (
+                            unit.numerOperacyjny ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Kierowca: " +
+                        (
+                            unit.kierowca ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Dowódca: " +
+                        (
+                            unit.dowódca ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Przodownik R1: " +
+                        (
+                            unit.przodownikR1 ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Pomocnik R1: " +
+                        (
+                            unit.pomocnikR1 ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Przodownik R2: " +
+                        (
+                            unit.przodownikR2 ||
+                            "—"
+                        ) +
+                        "\n" +
+
+                        "Pomocnik R2: " +
+                        (
+                            unit.pomocnikR2 ||
+                            "—"
+                        )
+                    );
+
+                })
+                .join("\n\n");
+
+    }
+
+
+    /* =========================================
+       SIŁY I ŚRODKI
+    ========================================= */
+
+    let resourcesText =
+        "Brak wpisanych sił i środków.";
+
+    if (karta.silyISrodki.length > 0) {
+
+        resourcesText =
+            karta.silyISrodki
+                .map(function(resource, index) {
+
+                    return (
+                        "**" +
+                        (index + 1) +
+                        ".** " +
+                        resource
+                    );
+
+                })
+                .join("\n");
+
+    }
+
+
+    /* =========================================
+       PRZEBIEG DZIAŁAŃ
+    ========================================= */
+
+function formatDiscordDateTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const [date, time] = value.split("T");
+
+    if (!date || !time) {
+        return value;
+    }
+
+    const [year, month, day] = date.split("-");
+
+    return `${day}.${month}.${year} ${time}`;
+}
+
+   const arrival =
+    formatDiscordDateTime(
+        karta.przybycieNaMiejsce
+    );
+
+const end =
+    formatDiscordDateTime(
+        karta.zakonczenieDzialan
+    );
+
+    /* =========================================
+       OPIS
+    ========================================= */
+
+    const description =
+        karta.opisZdarzenia
+            ? karta.opisZdarzenia
+            : "Brak opisu.";
+
+
+    /* =========================================
+       SPORZĄDZAJĄCY
+    ========================================= */
+
+    const author =
+        karta.sporzadzajacy
+            ? karta.sporzadzajacy
+            : "—";
+
+
+    /* =========================================
+       PAYLOAD DISCORD
+    ========================================= */
+
+    const payload = {
+
+        username:
+            "Karta Zdarzenia IZZ",
+
+        avatar_url:
+            "",
+
+        embeds: [
+
+            {
+
+                title:
+                    "🚒 KARTA ZDARZENIA IZZ",
+
+                color:
+                    0xB71C1C,
+
+
+fields: [
+
+    {
+        name: "👨‍🚒 KIERUJĄCY DZIAŁANIAMI RATOWNICZYMI",
+        value: karta.kierujacyDzialaniami || "—",
+        inline: false
+    },
+
+    {
+        name: "📋 WYPEŁNIA KZ Z UPRAWNIENIAMI",
+        value: karta.wypelniaKZ || "—",
+        inline: false
+    },
+
+    {
+        name: "🔥 KATEGORIA ZDARZENIA",
+        value: karta.kategoriaZdarzenia || "—",
+        inline: false
+    },
+
+    {
+        name: "📊 WIELKOŚĆ ZDARZENIA",
+        value: karta.wielkoscZdarzenia || "—",
+        inline: false
+    },
+
+    {
+        name: "📍 LOKALIZACJA ZDARZENIA",
+        value: karta.lokalizacja || "—",
+        inline: false
+    },
+
+    {
+        name: "🚒 OBSADA ZASTĘPÓW",
+        value: unitsText.length > 1024
+            ? unitsText.substring(0, 1020) + "..."
+            : unitsText,
+        inline: false
+    },
+
+    {
+        name: "🚨 SIŁY I ŚRODKI",
+        value: resourcesText.length > 1024
+            ? resourcesText.substring(0, 1020) + "..."
+            : resourcesText,
+        inline: false
+    },
+
+    {
+        name: "🕐 PRZYBYCIE NA MIEJSCE",
+        value: arrival,
+        inline: false
+    },
+
+    {
+        name: "🏁 ZAKOŃCZENIE DZIAŁAŃ",
+        value: end,
+        inline: false
+    },
+
+    {
+        name: "📝 OPIS ZDARZENIA",
+        value: description.length > 1024
+            ? description.substring(0, 1020) + "..."
+            : description,
+        inline: false
+    },
+
+    {
+        name: "✍️ SPORZĄDZIŁ",
+        value: author,
+        inline: false
+    }
+
+],
+
+
+                footer: {
+
+                    text:
+                        "Elektroniczna karta zdarzenia IZZ"
+
+                },
+
+
+                timestamp:
+                    new Date().toISOString()
+
+            }
+
+        ]
+
+    };
+
+
+    /* =========================================
+       WYSŁANIE DO DISCORDA
+    ========================================= */
+
+    try {
+
+        const response =
+            await fetch(
+                DISCORD_WEBHOOK_URL,
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify(
+                            payload
+                        )
+
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Discord HTTP " +
+                response.status
+            );
+
+        }
+
+
+        /* =====================================
+           ZAPIS LOKALNY
+        ===================================== */
+
+        localStorage.setItem(
+            "karta_IZZ",
+            JSON.stringify(
+                karta,
+                null,
+                2
+            )
+        );
+
+
+        /* =====================================
+           KOMUNIKAT
+        ===================================== */
+
+        const status =
+            document.getElementById(
+                "sendStatus"
+            );
+
+
+        status.textContent =
+            "✓ Karta IZZ została wysłana na Discord.";
+
+        status.classList.add(
+            "active"
+        );
+
+
+        alert(
+            "Karta IZZ została wysłana na Discord."
+        );
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Błąd wysyłania do Discord:",
+            error
+        );
+
+
+        alert(
+            "Nie udało się wysłać karty IZZ na Discord.\n\n" +
+            "Sprawdź adres Webhooka oraz konfigurację Discord."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NOWA KARTA
+========================================================= */
+
+function newCard() {
+
+    if (
+        !confirm(
+            "Czy rozpocząć nową kartę? Wszystkie wpisane dane zostaną wyczyszczone."
+        )
+    ) {
+
+        return;
+    }
+
+
+    document
+        .querySelectorAll("input")
+        .forEach(
+            function(input) {
+
+                input.value = "";
+
+            }
+        );
+
+
+    document
+        .querySelectorAll("textarea")
+        .forEach(
+            function(textarea) {
+
+                textarea.value = "";
+
+            }
+        );
+
+
+    document
+        .querySelectorAll("select")
+        .forEach(
+            function(select) {
+
+                select.selectedIndex = 0;
+
+            }
+        );
+
+
+    document.getElementById(
+        "eventSize"
+    ).innerHTML = `
+
+        <option value="">
+            -- wybierz kategorię --
+        </option>
+
+    `;
+
+
+    document
+        .getElementById(
+            "unitsContainer"
+        )
+        .innerHTML = "";
+
+
+    unitCounter = 0;
+
+
+    document
+        .getElementById(
+            "resourcesContainer"
+        )
+        .innerHTML = "";
+
+
+    resourceCounter = 0;
+
+
+    addResource();
+
+
+    document
+        .getElementById(
+            "sendStatus"
+        )
+        .classList.remove(
+            "active"
+        );
+}
+
+</script>
+
+</body>
+</html>
